@@ -1,14 +1,26 @@
+# Indica la versión del archivo de configuración de Docker Compose que se está utilizando
 version: "3"
-services: 
-  db:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: password123
-      POSTGRES_USER: user123
-      POSTGRES_DB: db123
-  app:
-    image: my-node-app
-    ports:
-      - 13000:3000
 
-      
+# Define los servicios que se ejecutarán en contenedores
+services: 
+  # Servicio para la base de datos PostgreSQL
+  db:
+    # Usa la imagen oficial de PostgreSQL desde Docker Hub
+    image: postgres
+    # Sección para definir variables de entorno que configuran PostgreSQL
+    environment:
+      # Establece la contraseña para el usuario de PostgreSQL
+      POSTGRES_PASSWORD: password123
+      # Nombre de usuario que se creará en PostgreSQL
+      POSTGRES_USER: user123
+      # Nombre de la base de datos que se creará automáticamente
+      POSTGRES_DB: db123
+
+  # Servicio para la aplicación Node.js
+  app:
+    # Nombre de la imagen que se utilizará para la aplicación
+    image: servidor
+    # Mapea puertos entre el host y el contenedor
+    ports:
+      # Mapea el puerto 13000 del host al puerto 3000 del contenedor
+      - 13000:3000

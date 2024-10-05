@@ -1,0 +1,33 @@
+Aqui voy a explicar que hace cada archivo.
+
+----------------------------------------------------------------------------------------------------
+db.js:
+Este archivo configura una bd con PostgreSQL.
+La conexión a la base de datos se establece utilizando los 
+parámetros que especificas (host, puerto, usuario, contraseña y nombre de la base de datos).
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+docker-compose.yaml:
+El archivo se utiliza para definir y configurar múltiples contenedores Docker
+que forman parte de tu aplicación. Es especialmente útil para aplicaciones que dependen de varios
+servicios (como bases de datos, servidores de aplicaciones, etc.).
+
+En mi caso tenemos dos contenedores, uno para la bd (PostgreSQL) y otro para el servidor 
+(le hemos llamado servidor).
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+Dockerfile:
+Cuando construyes la imagen con este Dockerfile, se crea un contenedor que puede ejecutar tu
+aplicación Node.js, instalando automáticamente todas las dependencias y configurando el entorno
+adecuadamente para que tu servidor esté listo para recibir solicitudes en el puerto 1337.
+----------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------
+server.js:
+Este server.js es el núcleo de tu aplicación que maneja las interacciones con la base de datos
+de niveles de ozono, permitiendo crear la tabla, insertar datos y recuperarlos a través
+de un API RESTful.
+----------------------------------------------------------------------------------------------------
