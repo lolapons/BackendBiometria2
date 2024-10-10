@@ -4,6 +4,8 @@ const express = require('express');
 // Importamos el pool de conexiones a la base de datos desde el archivo db.js.
 const pool = require('./db');
 
+const cors = require('cors'); // Asegúrate de que esta línea esté aquí
+
 // Definimos el puerto en el que el servidor escuchará las solicitudes.
 const port = 3000;
 
@@ -13,51 +15,46 @@ const app = express();
 // Usamos el middleware express.json() para que la aplicación pueda interpretar cuerpos de solicitudes en formato JSON.
 app.use(express.json());
 
+// Habilitamos CORS para todas las rutas
+app.use(cors());
+
+
 // Rutas
 
 // Ruta para configurar la base de datos y crear la tabla de mediciones.
 app.get('/setup', async (req, res) => {
     try {
-        // Ejecutamos una consulta para crear la tabla measurements con las columnas requeridas.
+        // Ejecutamos una consulta para crear la tabla medida con las columnas requeridas.
         await pool.query(`
-            CREATE TABLE IF NOT EXISTS measurements (
-                id SERIAL PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS medida (
+                idmedida SERIAL PRIMARY KEY,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                sensor_type INTEGER NOT NULL,    -- Columna para el tipo de sensor, donde 1 es "ozono" y 2 es "temperatura".
-                value DECIMAL(5,2) NOT NULL      -- Columna para almacenar el valor medido por el sensor.
+                valorOzono DECIMAL(5,2) NOT NULL,      -- Columna para almacenar el valor de ozono
+                valorTemperatura DECIMAL(5,2) NOT NULL  -- Columna para almacenar el valor de temperatura
             )
         `);
-        res.status(200).send({ message: "Successfully created measurements table" });
+        res.status(200).send({ message: "Successfully created medida table" });
     } catch (err) {
         console.log(err);
         res.sendStatus(500);
     }
 });
 
-app.post('/measurements', async (req, res) => {
-    // Extraemos los valores de sensor_type y value del cuerpo de la solicitud.
-    const { sensor_type, value } = req.body;
-    
-    console.log(`Received sensor_type: ${sensor_type}, value: ${value}`); // Agregado para depuración
+// Endpoint para insertar datos de mediciones
+app.post('/medida', async (req, res) => {
+    // Extraemos los valores de ozono y temperatura del cuerpo de la solicitud.
+    const { valorOzono, valorTemperatura } = req.body;
 
-    // Validación para asegurar que sensor_type sea 1 o 2.
-    if (sensor_type !== 1 && sensor_type !== 2) {
-        return res.status(400).send({ message: "Invalid sensor type. Must be 1 (ozono) or 2 (temperatura)." });
-    }
-
-    // Validación para asegurar que el valor no sea nulo y sea un número válido.
-    if (value == null || isNaN(Number(value))) {
-        return res.status(400).send({ message: "Invalid value" });
+    // Validación para asegurar que ambos valores no sean nulos y sean números válidos.
+    if (valorOzono == null || isNaN(Number(valorOzono)) || valorTemperatura == null || isNaN(Number(valorTemperatura))) {
+        return res.status(400).send({ message: "Invalid ozone value or temperature" });
     }
 
     try {
-        // Primero, eliminamos la medición existente (si hay alguna).
-        await pool.query('DELETE FROM measurements');
-
-        // Luego, insertamos los nuevos datos de medición.
+        // Insertamos los nuevos datos de medición.
         await pool.query(
-            'INSERT INTO measurements (sensor_type, value) VALUES ($1, $2)', 
-            [sensor_type, value] // Pasamos los valores como parámetros para prevenir inyecciones SQL.
+            'INSERT INTO medida (valorOzono, valorTemperatura) VALUES ($1, $2)', 
+            [valorOzono, valorTemperatura] // Pasamos los valores como parámetros para prevenir inyecciones SQL.
         );
 
         // Enviamos una respuesta exitosa al cliente indicando que los datos se han agregado.
@@ -68,11 +65,10 @@ app.post('/measurements', async (req, res) => {
     }
 });
 
-
-// Ruta para obtener todos los datos de la tabla de mediciones.
-app.get('/measurements', async (req, res) => {
+// Ruta para obtener todos los datos de la tabla de medidas.
+app.get('/medida', async (req, res) => {
     try {
-        const data = await pool.query('SELECT * FROM measurements');
+        const data = await pool.query('SELECT * FROM medida');
         res.status(200).send(data.rows);
     } catch (err) {
         console.log(err);
@@ -80,10 +76,10 @@ app.get('/measurements', async (req, res) => {
     }
 });
 
-// Ruta para eliminar todos los registros de la tabla de mediciones.
-app.delete('/measurements', async (req, res) => {
+// Ruta para eliminar todos los registros de la tabla de medidas.
+app.delete('/medida', async (req, res) => {
     try {
-        await pool.query('DELETE FROM measurements');
+        await pool.query('DELETE FROM medida');
         res.status(200).send({ message: "All measurement data successfully deleted" });
     } catch (err) {
         console.log(err);
